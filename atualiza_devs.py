@@ -1,13 +1,16 @@
 from pymongo import MongoClient
 from configparser import ConfigParser
 import os
+from dotenv import load_dotenv
 
 script_path = os.path.dirname(os.path.abspath(__file__))
 
 config = ConfigParser()
 config.read(f'{script_path}\\config.ini')
 
-uri = config['DEFAULT']['mongodb_uri']
+load_dotenv(f'{script_path}\\.env', override=True)
+
+uri = os.getenv('MONGODB_URI')
 
 client = MongoClient(uri)
 db = client['videoai']

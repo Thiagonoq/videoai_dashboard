@@ -2,6 +2,7 @@ from configparser import ConfigParser
 from datetime import datetime
 from pathlib import Path
 import json
+import re
 
 abs_path = Path(__file__).parent.parent
 script_path = abs_path / 'Scripts'
@@ -109,6 +110,21 @@ def merge_repeated_entries(json):
 
     save_json(new_analytics_path, data_combined)
 
+def update_template_name(json):
+    data = load_json(json)
+    uuid_regex = re.compile(r'[a-f\d]{8}[a-f\d]{4}[a-f\d]{4}[a-f\d]{4}[a-f\d]{12}', re.IGNORECASE)
+    hortifruti_remove = re.compile(r'Hortifruti - ')
+    for item in data:
+        for template in item['templates']:
+            if uuid_regex.match(template['name']):
+                template['name'] = 'NotIdentified'
+            else:
+                if hortifruti_remove.search(template['name']):
+                    template['name'] = template['name'].replace('Hortifruti - ', '')
+
+    save_json(new_analytics_path, data)
+        
+
 def list_clients(json):
     data = load_json(json)
     clients = []
@@ -167,10 +183,13 @@ def data_handling():
     # list_clients(new_analytics_path)
     # delete_entry(new_analytics_path)
 
+    # 5º Passo: Retirar "Hortifruti - " do nome dos templates
+    update_template_name(new_analytics_path)     
+
     # Extra: verificar se todos os clientes de analytics existem no clients
     # verify_clients(new_analytics_path, clients_path)
-    
+
     return empty_entries
 
 if __name__ == '__main__':
-    data_handling()
+    update_template_name(new_analytics_path)
