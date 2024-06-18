@@ -1,19 +1,16 @@
-from configparser import ConfigParser
 from datetime import datetime
 from pathlib import Path
 import json
 import re
+import config
 
 abs_path = Path(__file__).parent.parent
 script_path = abs_path / 'Scripts'
 
-config = ConfigParser()
-config.read(script_path / 'config.ini')
-
-analytics_file = config['FILES']['analytics_json_path']
-new_analytics_file = config['FILES']['new_analytics_json_path']
-new_list_file = config['FILES']['list_json_path']
-clients_file = config['FILES']['clients_json_path']
+analytics_file = config.analytics_json_path
+new_analytics_file = config.new_analytics_json_path
+new_list_file = config.list_json_path
+clients_file = config.clients_json_path
 
 analytics_path = abs_path / analytics_file
 # file2_path = 'C:\\Users\\thiag\\Desktop\\Video AI\\Dashboard\\videoai.analytics2.json'
@@ -121,9 +118,10 @@ def update_template_name(json):
             else:
                 if hortifruti_remove.search(template['name']):
                     template['name'] = template['name'].replace('Hortifruti - ', '')
+                
+                template['name'] = template['name'].replace('Vídeo', 'Video')
 
-    save_json(new_analytics_path, data)
-        
+    save_json(new_analytics_path, data)      
 
 def list_clients(json):
     data = load_json(json)

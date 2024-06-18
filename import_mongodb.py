@@ -1,25 +1,17 @@
 from pymongo import MongoClient
 from bson import ObjectId
 from datetime import datetime
-from configparser import ConfigParser
+import config
 import json
 import conserta_json
 import atualiza_devs
 from pathlib import Path
-from dotenv import load_dotenv
-import os
 
 abs_path = Path(__file__).parent.parent
-script_path = abs_path / 'Scripts'
-
-config = ConfigParser()
-config.read(script_path / 'config.ini')
-
-load_dotenv(script_path / '.env', override=True)
 
 # Acessar a URI sob a seção MongoDB
-uri = os.getenv('MONGODB_URI')
-analytics_file = config['FILES']['analytics_json_path']
+uri = config.uri
+analytics_file = config.analytics_json_path
 
 client = MongoClient(uri)
 db = client['videoai']

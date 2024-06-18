@@ -1,15 +1,8 @@
 from pymongo import MongoClient
-from configparser import ConfigParser
-import os
+import config
 from datetime import datetime
 
-abs_path = 'C:\\Users\\thiag\\Desktop\\Video AI\\Dashboard'
-script_path = os.path.join(abs_path, 'Scripts')
-
-config = ConfigParser()
-config.read(f'{script_path}\\config.ini')
-
-uri = config['DEFAULT']['mongodb_uri']
+uri = config.uri
 
 client = MongoClient(uri)
 db = client['videoai']
