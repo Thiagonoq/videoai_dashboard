@@ -1,1 +1,4 @@
 .env
+
+google_drive_creds.json
+client_secrets.json

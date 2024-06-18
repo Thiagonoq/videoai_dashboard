@@ -21,12 +21,12 @@ json_path = abs_path / analytics_file
 
 def import_json(client, db, collections):
     for collection in collections:
-        if collection == 'clients':
-            atualiza_devs.update_dev_info(db)
+        # if collection == 'clients':
+        #     atualiza_devs.update_dev_info(db)
+        
         date_name = 'created_at' if collection != 'cta_list_response' else 'date'
         date = datetime.combine(datetime.now(), datetime.min.time())
 
-        print(f'{{{date_name}: {{"$lte": {date}}}}}')
         document = db[collection].find({date_name: {"$lte": date}})
 
         with open(f'{abs_path}\\videoai.{collection}.json', 'w', encoding='utf-8') as file:
