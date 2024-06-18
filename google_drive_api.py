@@ -5,7 +5,6 @@ from pydrive.drive import GoogleDrive
 abs_path = Path(__file__).parent.parent
 google_creds = abs_path / 'Scripts' / 'google_drive_creds.json'
 client_secrets = abs_path / 'Scripts' / 'client_secrets.json'
-json_path = abs_path / 'videoai.analytics.json'
 
 def auth_drive():
     gauth = GoogleAuth()
@@ -28,4 +27,4 @@ def auth_drive():
     gauth.SaveCredentialsFile(google_creds)
     drive = GoogleDrive(gauth)
 
-    return drive
+    return drive, gauth.credentials

@@ -1,10 +1,8 @@
 from pymongo import MongoClient
-from bson import ObjectId
 from datetime import datetime
 import config
 import json
 import conserta_json
-import atualiza_devs
 import google_drive_api
 from pathlib import Path
 
@@ -35,13 +33,14 @@ def import_json(client, db, collections):
         with open(data_path, 'w', encoding='utf-8') as file:
             json.dump(list(document), file, default=str, ensure_ascii=False)
 
-        jsons_list.append(data_path)
-
         if collection == 'analytics':
-            empty_entries = conserta_json.data_handling()
+            empty_entries, data_path = conserta_json.data_handling()
 
             if empty_entries:
                 del_entries_db(db, collection, date)
+
+        jsons_list.append(data_path)
+
     upload_to_google_drive(jsons_list)
     print('Importação concluida')
     client.close()
@@ -54,52 +53,8 @@ def del_entries_db(db, collection, date):
         'created_at': { '$lte': date }
 })
 
-def export_json_to_mongodb(client, db, json_path):
-    collection = db['analytics']
-    json_data = conserta_json.load_json(json_path)
-    data = [convert_types(document) for document in json_data]
-
-    if isinstance(data, list):
-        collection.insert_many(data)
-        print('Exportação concluida')
-    else:
-        print('Exportação falhou')
-
-    client.close()
-
-def convert_types(document):
-    if '_id' in document and isinstance(document['_id'], str):
-        document['_id'] = ObjectId(document['_id'])
-
-    for date_field in ['created_at', 'updated_at']:
-        if document.get(date_field, None) is not None:
-            document[date_field] = datetime.strptime(document[date_field], '%Y-%m-%d %H:%M:%S.%f')
-
-    if 'templates' in document:
-        for template, in document['templates']:
-            if 'flows' in template:
-                for flow in template['flows']:
-                    for key in ['started', 'ended']:
-                        if flow.get(key, None) is not None:
-                            flow[key] = datetime.strptime(flow[key], '%Y-%m-%d %H:%M:%S.%f')
-    return document
-
-def atualiza_produtos(db):
-    collection = db['hortifruti_products']
-    tips_path = 'C:\\Users\\thiag\\Desktop\\Video AI\\Banco de Imagens\\tips.json'
-    tips = conserta_json.load_json(tips_path)
-
-    for tip in tips:
-        collection.update_one(
-            {"product": tip['product']}, 
-            {"$set": {"tips": tip['tips']}}
-        )
-        print(f'Produto atualizado: {tip["product"]}')
-    
-    print('Produtos atualizados')
-    
 def upload_to_google_drive(jsons_list):
-    drive = google_drive_api.auth_drive()
+    drive, creds = google_drive_api.auth_drive()
     google_json_folder_id = '1WUNM-yF2zgDwDCKe-qX5Wl8lI-cC0A71'
     
     for json_path in jsons_list:
@@ -125,11 +80,12 @@ def upload_to_google_drive(jsons_list):
 
             print(f'Arquivo {file_name} enviado com sucesso!')
 
+            # Adiciona a URL de download para uso no Power BI
+            # print(f"URL para download: https://www.googleapis.com/drive/v3/files/{file_drive['id']}?alt=media&access_token={creds.access_token}")
+
         except Exception as e:
             print(e)
             continue
 
 if __name__ == '__main__':
     import_json(client, db, collections)
-    # export_json_to_mongodb(client, db, json_path)
-    # atualiza_produtos(db)

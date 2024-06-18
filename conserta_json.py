@@ -187,7 +187,7 @@ def data_handling():
     # Extra: verificar se todos os clientes de analytics existem no clients
     # verify_clients(new_analytics_path, clients_path)
 
-    return empty_entries
+    return empty_entries, new_analytics_path
 
 if __name__ == '__main__':
     update_template_name(new_analytics_path)
